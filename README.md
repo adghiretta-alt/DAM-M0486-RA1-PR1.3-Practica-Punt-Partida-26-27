@@ -4,9 +4,9 @@ Aquest projecte correspon a la pràctica PR1.3 relacionada amb treball amb docum
 
 ### Instruccions ###
 
-Primer posar en funcionament el servidor
+Cal completar el codi marcat amb `// *************** CODI PRÀCTICA **********************/` a les classes `PR130Main`, `PR131Main` i `PR132Main`, seguint l'enunciat de la pràctica.
 
-Després executar el client i comprovar com els càlculs obtenen resultat des del servidor
+La pràctica està acabada quan el codi passa tots els tests (`mvn test`).
 
 ### Compilació i funcionament ###
 
@@ -38,13 +38,12 @@ Per executar sense usar script propi, directament amb maven:
 mvn exec:java "-Dexec.mainClass=com.project.pr13.PR13Main"
 ```
 
-Per executar, un cop generat l'artefacte .jar
+Per executar, un cop generat l'artefacte .jar (`mvn package`, o bé `mvn package -DskipTests` si encara no passen tots els tests)
 ```bash
-java -cp ./target/ams2-m0486-pr11-repo-ref-1.0.1.jar com.project.pr13.PR13Main
+java -cp ./target/project-name-1.0.0.jar com.project.pr13.PR13Main
 ```
 
 ### Execució de tests ###
-Per executar, un cop generat l'artefacte .jar
 ```bash
 # Executar TOTS els tests
 mvn test
@@ -53,12 +52,10 @@ mvn test "-Dtest=com.project.pr13.PR130MainTest"
 mvn test -Dtest=PR130MainTest
 # Executar múltiples tests específics (separats per comes)
 mvn test -Dtest="PR130MainTest,PR131MainTest,PR132MainTest"
-# Tots els tests que comencin amb "Lectura"
-mvn test -Dtest="Lectura*"
-# Tots els tests que continguin "Arxiu"
-mvn test -Dtest="*Arxiu*"
-# Tests específics de List i Scanner
-mvn test -Dtest="*List*,*Scanner*"
+# Executar un sol mètode d'un test
+mvn test -Dtest="PR132MainTest#testAfegirAlumne"
+# Tots els tests que comencin amb "PR13"
+mvn test -Dtest="PR13*"
 ```
 
 ### Visual Studio Code: resseteig de l'entorn de programació Java ###

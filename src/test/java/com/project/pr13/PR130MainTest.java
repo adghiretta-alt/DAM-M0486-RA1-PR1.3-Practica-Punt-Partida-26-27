@@ -70,7 +70,7 @@ class PR130MainTest {
 
     @Test
     void testImprimirCapçaleres() {
-        String expected = "Nom      Cognom        Edat  Ciutat\n-------- -------------- ----- ---------";
+        String expected = "Nom      Cognom         Edat  Ciutat\n-------- -------------- ----- ---------";
         assertEquals(expected, PersonaFormatter.getCapçaleres(), "Les capçaleres no són correctes.");
     }
 

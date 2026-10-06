@@ -242,6 +242,9 @@ public class PR132Main {
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
+            // Sense això, l'espai en blanc original es manté i el fitxer s'omple de línies buides
+            eliminarEspaisEnBlanc(document);
+
             DOMSource source = new DOMSource(document);
             StreamResult result = new StreamResult(xmlFilePath.toFile());
             transformer.transform(source, result);
@@ -249,6 +252,27 @@ public class PR132Main {
         } catch (TransformerException e) {
             System.out.println("Error en guardar el fitxer XML.");
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Elimina, de manera recursiva, els nodes de text que només contenen espais, tabuladors
+     * o salts de línia (l'indentació del fitxer original). Si no s'eliminen, en tornar a
+     * escriure el document amb INDENT = "yes" el fitxer s'omple de línies en blanc.
+     * És el mateix mètode trimWhitespace que s'explica a la teoria.
+     *
+     * @param node Node a partir del qual es fa la neteja (normalment, el Document).
+     */
+    private static void eliminarEspaisEnBlanc(Node node) {
+        NodeList fills = node.getChildNodes();
+        // Es recorre de darrere cap endavant perquè getChildNodes() és una llista «viva»
+        for (int i = fills.getLength() - 1; i >= 0; i--) {
+            Node fill = fills.item(i);
+            if (fill.getNodeType() == Node.TEXT_NODE && fill.getTextContent().isBlank()) {
+                node.removeChild(fill);
+            } else {
+                eliminarEspaisEnBlanc(fill);
+            }
         }
     }
 }
