@@ -88,10 +88,11 @@ public class PR131Main {
 
     /**
      * Crea un document XML amb l'estructura d'una biblioteca i afegeix un llibre amb els seus detalls.
+     * Cal construir-lo amb DocumentBuilder. No és privat perquè els tests el puguin comprovar.
      * 
      * @return Document XML creat o null en cas d'error.
      */
-    private static Document construirDocument() {
+    static Document construirDocument() {
         // *************** CODI PRÀCTICA **********************/
        return null; // Substitueix pel teu
     }

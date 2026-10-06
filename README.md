@@ -4,7 +4,7 @@ Aquest projecte correspon a la pràctica PR1.3 relacionada amb treball amb docum
 
 ### Instruccions ###
 
-Cal completar el codi marcat amb `// *************** CODI PRÀCTICA **********************/` a les classes `PR130Main`, `PR131Main` i `PR132Main`, seguint l'enunciat de la pràctica.
+Cal completar el codi marcat amb `// *************** CODI PRÀCTICA **********************/` a les classes `PR130Main`, `format/PersonaFormatter`, `PR131Main` i `PR132Main`, seguint l'enunciat de la pràctica.
 
 La pràctica està acabada quan el codi passa tots els tests (`mvn test`).
 

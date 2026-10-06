@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PR131MainTest {
@@ -24,6 +27,51 @@ class PR131MainTest {
     void setup() {
         // Inicialitza l'objecte PR131Main amb el directori temporal creat per JUnit
         app = new PR131Main(tempDir);
+    }
+
+    /**
+     * Comprova que el document té exactament el contingut de l'annex "biblioteca.xml".
+     */
+    private static void comprovarBiblioteca(Document doc) {
+        Element biblioteca = doc.getDocumentElement();
+        assertEquals("biblioteca", biblioteca.getTagName(), "L'element arrel hauria de ser 'biblioteca'.");
+
+        NodeList llibres = biblioteca.getElementsByTagName("llibre");
+        assertEquals(1, llibres.getLength(), "Hi hauria d'haver un sol llibre.");
+        Element llibre = (Element) llibres.item(0);
+        assertEquals("001", llibre.getAttribute("id"), "L'ID del llibre hauria de ser '001'.");
+
+        String[][] camps = {
+                {"titol", "El viatge dels venturons"},
+                {"autor", "Joan Pla"},
+                {"anyPublicacio", "1998"},
+                {"editorial", "Edicions Mar"},
+                {"genere", "Aventura"},
+                {"pagines", "320"},
+                {"disponible", "true"},
+        };
+        for (String[] camp : camps) {
+            NodeList nodes = llibre.getElementsByTagName(camp[0]);
+            assertEquals(1, nodes.getLength(), "El llibre hauria de tenir un element '" + camp[0] + "'.");
+            assertEquals(camp[1], nodes.item(0).getTextContent(),
+                    "El valor de '" + camp[0] + "' hauria de ser '" + camp[1] + "'.");
+        }
+
+        int fills = 0;
+        for (Node node = llibre.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                fills++;
+            }
+        }
+        assertEquals(camps.length, fills, "El llibre no hauria de tenir més elements que els de l'annex.");
+    }
+
+    @Test
+    void testConstruirDocument() {
+        // L'enunciat demana construir el document amb DocumentBuilder
+        Document doc = PR131Main.construirDocument();
+        assertNotNull(doc, "construirDocument ha de crear el document amb DocumentBuilder i retornar-lo.");
+        comprovarBiblioteca(doc);
     }
 
     @Test
@@ -41,41 +89,14 @@ class PR131MainTest {
         // Executa la generació del fitxer XML
         app.processarFitxerXML("biblioteca.xml");
 
-        // Verifica que el contingut del fitxer és correcte.
-        // Si el fitxer no existeix o no es pot llegir, el test falla amb l'excepció.
+        // Llegeix el fitxer generat. Si no existeix o no és XML vàlid, el test falla amb l'excepció.
         File outputFile = new File(tempDir, "biblioteca.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(outputFile);
         doc.getDocumentElement().normalize();
 
-        // Comprova els elements del document
-        Element biblioteca = (Element) doc.getElementsByTagName("biblioteca").item(0);
-        Element llibre = (Element) biblioteca.getElementsByTagName("llibre").item(0);
-        String id = llibre.getAttribute("id");
-        assertEquals("001", id, "L'ID del llibre hauria de ser '001'.");
-
-        // Comprova el contingut dels elements
-        String titol = llibre.getElementsByTagName("titol").item(0).getTextContent();
-        assertEquals("El viatge dels venturons", titol, "El títol hauria de ser 'El viatge dels venturons'.");
-
-        String autor = llibre.getElementsByTagName("autor").item(0).getTextContent();
-        assertEquals("Joan Pla", autor, "L'autor hauria de ser 'Joan Pla'.");
-
-        String anyPublicacio = llibre.getElementsByTagName("anyPublicacio").item(0).getTextContent();
-        assertEquals("1998", anyPublicacio, "L'any de publicació hauria de ser '1998'.");
-
-        String editorial = llibre.getElementsByTagName("editorial").item(0).getTextContent();
-        assertEquals("Edicions Mar", editorial, "L'editorial hauria de ser 'Edicions Mar'.");
-
-        String genere = llibre.getElementsByTagName("genere").item(0).getTextContent();
-        assertEquals("Aventura", genere, "El gènere hauria de ser 'Aventura'.");
-
-        String pagines = llibre.getElementsByTagName("pagines").item(0).getTextContent();
-        assertEquals("320", pagines, "El nombre de pàgines hauria de ser '320'.");
-
-        String disponible = llibre.getElementsByTagName("disponible").item(0).getTextContent();
-        assertEquals("true", disponible, "El valor 'disponible' hauria de ser 'true'.");
+        comprovarBiblioteca(doc);
     }
 
     @Test

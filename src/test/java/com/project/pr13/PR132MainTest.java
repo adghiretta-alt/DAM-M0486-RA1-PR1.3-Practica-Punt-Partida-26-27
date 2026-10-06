@@ -7,10 +7,13 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PR132MainTest {
@@ -53,7 +56,7 @@ class PR132MainTest {
         tempFilePath = tempFile.toPath();
 
         // Escriure el contingut de base al fitxer "cursos.xml"
-        try (FileWriter writer = new FileWriter(tempFile)) {
+        try (FileWriter writer = new FileWriter(tempFile, StandardCharsets.UTF_8)) {
             writer.write(XML_CONTENT);
         }
 
@@ -63,29 +66,30 @@ class PR132MainTest {
 
     @Test
     void testLlistarCursos() {
-        // Comprovar que la llista de cursos és correcta
+        // Cada fila ha de tenir l'ID del curs, el tutor i el total d'alumnes
         List<List<String>> cursos = app.llistarCursos();
-        assertEquals(2, cursos.size(), "Hauria d'haver-hi dos cursos.");
-
-        // Comprovar detalls dels cursos
-        assertEquals("AMS2", cursos.get(0).get(0), "El primer curs hauria de tenir ID 'AMS2'.");
-        assertEquals("AWS1", cursos.get(1).get(0), "El segon curs hauria de tenir ID 'AWS1'.");
+        assertEquals(List.of(
+                        List.of("AMS2", "LARA, Francesc", "2"),
+                        List.of("AWS1", "Julian Fuentes", "2")),
+                cursos, "La llista de cursos (ID, tutor, total d'alumnes) no és correcta.");
     }
 
     @Test
     void testMostrarModuls() {
-        // Comprovar que el curs AMS2 té un mòdul amb ID M06
-        List<List<String>> moduls = app.mostrarModuls("AMS2");
-        assertEquals(1, moduls.size(), "El curs AMS2 hauria de tenir un mòdul.");
-        assertEquals("M06", moduls.get(0).get(0), "El mòdul del curs AMS2 hauria de tenir ID 'M06'.");
+        // Cada fila ha de tenir l'ID i el títol del mòdul
+        assertEquals(List.of(List.of("M06", "Accés a dades")), app.mostrarModuls("AMS2"),
+                "El curs AMS2 hauria de tenir només el mòdul M06, 'Accés a dades'.");
+        assertEquals(List.of(), app.mostrarModuls("AWS1"),
+                "El curs AWS1 no té mòduls: la llista hauria de ser buida.");
     }
 
     @Test
     void testLlistarAlumnes() {
-        // Comprovar que la llista d'alumnes del curs AMS2 és correcta
-        List<String> alumnes = app.llistarAlumnes("AMS2");
-        assertTrue(alumnes.contains("ALVAREZ, Tomas"), "L'alumne ALVAREZ, Tomas hauria de ser al curs AMS2.");
-        assertTrue(alumnes.contains("CAMACHO, David"), "L'alumne CAMACHO, David hauria de ser al curs AMS2.");
+        // Només s'han de retornar els alumnes del curs indicat
+        assertEquals(List.of("ALVAREZ, Tomas", "CAMACHO, David"), app.llistarAlumnes("AMS2"),
+                "La llista d'alumnes del curs AMS2 no és correcta.");
+        assertEquals(List.of("FERNANDEZ, Ruben", "JANSSEN, Gerard"), app.llistarAlumnes("AWS1"),
+                "La llista d'alumnes del curs AWS1 no és correcta.");
     }
 
     @Test
@@ -93,9 +97,17 @@ class PR132MainTest {
         // Afegir un nou alumne al curs AWS1
         app.afegirAlumne("AWS1", "NOU, Alumne");
 
-        // Comprovar que l'alumne s'ha afegit correctament
-        List<String> alumnes = app.llistarAlumnes("AWS1");
-        assertTrue(alumnes.contains("NOU, Alumne"), "L'alumne hauria d'haver estat afegit.");
+        List<String> alumnesAWS1 = app.llistarAlumnes("AWS1");
+        assertEquals(3, alumnesAWS1.size(), "El curs AWS1 hauria de tenir 3 alumnes.");
+        assertTrue(alumnesAWS1.containsAll(List.of("FERNANDEZ, Ruben", "JANSSEN, Gerard", "NOU, Alumne")),
+                "L'alumne s'hauria d'haver afegit al curs AWS1 sense perdre els que ja hi eren.");
+        assertEquals(List.of("ALVAREZ, Tomas", "CAMACHO, David"), app.llistarAlumnes("AMS2"),
+                "Els altres cursos no s'han de modificar.");
+
+        // El canvi s'ha de desar al fitxer: una instància nova l'ha de veure
+        PR132Main appNova = new PR132Main(tempFilePath);
+        assertTrue(appNova.llistarAlumnes("AWS1").contains("NOU, Alumne"),
+                "El canvi s'hauria d'haver desat al fitxer XML.");
     }
 
     @Test
@@ -103,8 +115,29 @@ class PR132MainTest {
         // Eliminar l'alumne CAMACHO, David del curs AMS2
         app.eliminarAlumne("AMS2", "CAMACHO, David");
 
-        // Comprovar que l'alumne s'ha eliminat correctament
-        List<String> alumnes = app.llistarAlumnes("AMS2");
-        assertTrue(!alumnes.contains("CAMACHO, David"), "L'alumne CAMACHO, David hauria d'haver estat eliminat.");
+        assertEquals(List.of("ALVAREZ, Tomas"), app.llistarAlumnes("AMS2"),
+                "Al curs AMS2 només hi hauria de quedar ALVAREZ, Tomas.");
+        assertEquals(List.of("FERNANDEZ, Ruben", "JANSSEN, Gerard"), app.llistarAlumnes("AWS1"),
+                "Els altres cursos no s'han de modificar.");
+
+        // El canvi s'ha de desar al fitxer: una instància nova l'ha de veure
+        PR132Main appNova = new PR132Main(tempFilePath);
+        assertFalse(appNova.llistarAlumnes("AMS2").contains("CAMACHO, David"),
+                "El canvi s'hauria d'haver desat al fitxer XML.");
+    }
+
+    @Test
+    void testUtilitzaXPath() throws IOException {
+        // L'enunciat demana fer servir XPath per navegar per l'arbre XML.
+        // Es revisa el codi font de PR132Main, sense tenir en compte els comentaris.
+        String codi = Files.readString(Path.of("src", "main", "java", "com", "project", "pr13", "PR132Main.java"));
+        String codiSenseComentaris = codi
+                .replaceAll("(?s)/\\*.*?\\*/", "")
+                .replaceAll("//[^\\n]*", "");
+
+        assertTrue(codiSenseComentaris.contains(".evaluate(") || codiSenseComentaris.contains(".compile("),
+                "Cal fer servir XPath (evaluate) per navegar per l'arbre XML.");
+        assertFalse(codiSenseComentaris.contains("getElementsByTagName"),
+                "Cal navegar per l'arbre XML amb XPath, no amb getElementsByTagName.");
     }
 }

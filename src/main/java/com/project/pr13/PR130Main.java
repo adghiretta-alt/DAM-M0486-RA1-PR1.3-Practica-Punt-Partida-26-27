@@ -53,8 +53,8 @@ public class PR130Main {
         Document doc = parseXML(inputFile);
         if (doc != null) {
             NodeList persones = doc.getElementsByTagName("persona");
-            // imprimirCapçaleres();
-            // imprimirDadesPersones(persones);
+            imprimirCapçaleres();
+            imprimirDadesPersones(persones);
         }
     }
 
@@ -66,6 +66,24 @@ public class PR130Main {
      */
     public static Document parseXML(File inputFile) {
         // *************** CODI PRÀCTICA **********************/
-        return null; // Substitueix pel teu        
+        return null; // Substitueix pel teu
+    }
+
+    /**
+     * Imprimeix per consola les capçaleres de la taula de persones.
+     * Cal fer servir PersonaFormatter.getCapçaleres().
+     */
+    public static void imprimirCapçaleres() {
+        // *************** CODI PRÀCTICA **********************/
+    }
+
+    /**
+     * Imprimeix per consola una línia per a cada persona del NodeList,
+     * amb el format de PersonaFormatter.formatarPersona().
+     *
+     * @param persones NodeList amb els elements "persona" del document XML.
+     */
+    public static void imprimirDadesPersones(NodeList persones) {
+        // *************** CODI PRÀCTICA **********************/
     }
 }
