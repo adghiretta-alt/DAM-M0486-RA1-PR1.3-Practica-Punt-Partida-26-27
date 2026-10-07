@@ -9,7 +9,6 @@ import com.project.pr13.format.PersonaFormatter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * Classe principal que gestiona la lectura i el processament de fitxers XML per obtenir dades de persones.
@@ -66,7 +65,14 @@ public class PR130Main {
      */
     public static Document parseXML(File inputFile) {
         // *************** CODI PRÀCTICA **********************/
-        return null; // Substitueix pel teu
+        try{
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                return builder.parse(inputFile); // Substitueix pel te
+        }catch (Exception e) {
+            System.err.println("Error al llegir el fitxer XML: " + e.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -75,6 +81,7 @@ public class PR130Main {
      */
     public static void imprimirCapçaleres() {
         // *************** CODI PRÀCTICA **********************/
+        System.out.println(PersonaFormatter.getCapçaleres());
     }
 
     /**
@@ -84,6 +91,15 @@ public class PR130Main {
      * @param persones NodeList amb els elements "persona" del document XML.
      */
     public static void imprimirDadesPersones(NodeList persones) {
-        // *************** CODI PRÀCTICA **********************/
+    // *************** CODI PRÀCTICA **********************/
+        for (int i = 0; i < persones.getLength(); i++) {
+            Element personaElement = (Element) persones.item(i);
+            String nom = personaElement.getElementsByTagName("nom").item(0).getTextContent();
+            String cognom = personaElement.getElementsByTagName("cognom").item(0).getTextContent();
+            String edat = personaElement.getElementsByTagName("edat").item(0).getTextContent();
+            String ciutat = personaElement.getElementsByTagName("ciutat").item(0).getTextContent();
+
+            System.out.println(PersonaFormatter.formatarPersona(nom, cognom, edat, ciutat));
+        }
     }
 }

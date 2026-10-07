@@ -15,9 +15,13 @@ public class PersonaFormatter {
      * @return Capçalera de la taula de persones.
      */
     public static String getCapçaleres() {
-        // *************** CODI PRÀCTICA **********************/
-        return ""; // Substitueix pel teu
-    }
+    // *************** CODI PRÀCTICA **********************/
+        return String.format(
+                "%-8s %-14s %-5s %-9s%n%-8s %-14s %-5s %-9s",
+                "Nom", "Cognom", "Edat", "Ciutat",
+                "--------", "--------------", "-----", "---------"
+    );
+}
 
     /**
      * Retorna una línia amb les dades d'una persona, alineades sota la seva capçalera.
@@ -30,6 +34,9 @@ public class PersonaFormatter {
      */
     public static String formatarPersona(String nom, String cognom, String edat, String ciutat) {
         // *************** CODI PRÀCTICA **********************/
-        return ""; // Substitueix pel teu
+        return String.format(
+                "%-8s %-14s %-5s %-9s",
+                nom, cognom, edat, ciutat
+        );
     }
 }
