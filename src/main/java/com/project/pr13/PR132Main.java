@@ -1,3 +1,4 @@
+
 package com.project.pr13;
 
 import org.w3c.dom.Document;
@@ -11,117 +12,123 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Classe principal que permet gestionar un fitxer XML de cursos amb opcions per llistar, afegir i eliminar alumnes, 
- * així com mostrar informació dels cursos i mòduls.
- * 
- * Aquesta classe inclou funcionalitats per interactuar amb un fitxer XML, executar operacions de consulta,
- * i realitzar modificacions en el contingut del fitxer.
- */
 public class PR132Main {
 
     private final Path xmlFilePath;
     private static final Scanner scanner = new Scanner(System.in);
 
-    /**
-     * Constructor de la classe PR132Main.
-     * 
-     * @param xmlFilePath Ruta al fitxer XML que conté la informació dels cursos.
-     */
     public PR132Main(Path xmlFilePath) {
         this.xmlFilePath = xmlFilePath;
     }
 
-    /**
-     * Mètode principal que inicia l'execució del programa.
-     * 
-     * @param args Arguments passats a la línia de comandament (no s'utilitzen en aquest programa).
-     */
     public static void main(String[] args) {
         String userDir = System.getProperty("user.dir");
-        Path xmlFilePath = Paths.get(userDir, "data", "pr13", "cursos.xml");
+
+        Path xmlFilePath = Paths.get(
+                userDir, "data", "pr13", "cursos.xml"
+        );
 
         PR132Main app = new PR132Main(xmlFilePath);
         app.executar();
     }
 
-    /**
-     * Executa el menú principal del programa fins que l'usuari decideixi sortir.
-     */
     public void executar() {
         boolean exit = false;
+
         while (!exit) {
             mostrarMenu();
             System.out.print("Escull una opció: ");
-            int opcio = scanner.nextInt();
-            scanner.nextLine(); // Netegem el buffer del scanner
-            exit = processarOpcio(opcio);
+
+            try {
+                int opcio = Integer.parseInt(scanner.nextLine());
+                exit = processarOpcio(opcio);
+            } catch (NumberFormatException e) {
+                System.out.println("Introdueix un número vàlid.");
+            }
         }
     }
 
-    /**
-     * Processa l'opció seleccionada per l'usuari.
-     * 
-     * @param opcio Opció seleccionada al menú.
-     * @return True si l'usuari decideix sortir del programa, false en cas contrari.
-     */
     public boolean processarOpcio(int opcio) {
         String cursId;
         String nomAlumne;
+
         switch (opcio) {
             case 1:
                 List<List<String>> cursos = llistarCursos();
                 imprimirTaulaCursos(cursos);
                 return false;
+
             case 2:
-                System.out.print("Introdueix l'ID del curs per veure els seus mòduls: ");
+                System.out.print(
+                        "Introdueix l'ID del curs per veure els seus mòduls: "
+                );
                 cursId = scanner.nextLine();
+
                 List<List<String>> moduls = mostrarModuls(cursId);
                 imprimirTaulaModuls(moduls);
                 return false;
+
             case 3:
-                System.out.print("Introdueix l'ID del curs per veure la llista d'alumnes: ");
+                System.out.print(
+                        "Introdueix l'ID del curs per veure la llista d'alumnes: "
+                );
                 cursId = scanner.nextLine();
+
                 List<String> alumnes = llistarAlumnes(cursId);
                 imprimirLlistaAlumnes(alumnes);
                 return false;
+
             case 4:
-                System.out.print("Introdueix l'ID del curs on vols afegir l'alumne: ");
+                System.out.print(
+                        "Introdueix l'ID del curs on vols afegir l'alumne: "
+                );
                 cursId = scanner.nextLine();
-                System.out.print("Introdueix el nom complet de l'alumne a afegir: ");
+
+                System.out.print(
+                        "Introdueix el nom complet de l'alumne a afegir: "
+                );
                 nomAlumne = scanner.nextLine();
+
                 afegirAlumne(cursId, nomAlumne);
                 return false;
+
             case 5:
-                System.out.print("Introdueix l'ID del curs on vols eliminar l'alumne: ");
+                System.out.print(
+                        "Introdueix l'ID del curs on vols eliminar l'alumne: "
+                );
                 cursId = scanner.nextLine();
-                System.out.print("Introdueix el nom complet de l'alumne a eliminar: ");
+
+                System.out.print(
+                        "Introdueix el nom complet de l'alumne a eliminar: "
+                );
                 nomAlumne = scanner.nextLine();
+
                 eliminarAlumne(cursId, nomAlumne);
                 return false;
+
             case 6:
                 System.out.println("Sortint del programa...");
                 return true;
+
             default:
-                System.out.println("Opció no reconeguda. Si us plau, prova de nou.");
+                System.out.println(
+                        "Opció no reconeguda. Si us plau, prova de nou."
+                );
                 return false;
         }
     }
 
-    /**
-     * Mostra el menú principal amb les opcions disponibles.
-     */
     private void mostrarMenu() {
         System.out.println("\nMENÚ PRINCIPAL");
         System.out.println("1. Llistar IDs de cursos i tutors");
@@ -133,146 +140,368 @@ public class PR132Main {
     }
 
     /**
-     * Llegeix el fitxer XML i llista tots els cursos amb el seu tutor i nombre d'alumnes.
-     * 
-     * @return Llista amb la informació dels cursos (ID, tutor, nombre d'alumnes).
+     * Opció 1: llista els cursos, els tutors i el nombre d'alumnes.
      */
     public List<List<String>> llistarCursos() {
-        // *************** CODI PRÀCTICA **********************/
-        return null; // Substitueix pel teu
+        List<List<String>> cursos = new ArrayList<>();
+
+        try {
+            Document doc = carregarDocumentXML(xmlFilePath);
+            XPath xpath = XPathFactory.newInstance().newXPath();
+
+            NodeList nodesCursos = (NodeList) xpath.evaluate(
+                    "/cursos/curs",
+                    doc,
+                    XPathConstants.NODESET
+            );
+
+            for (int i = 0; i < nodesCursos.getLength(); i++) {
+                Element curs = (Element) nodesCursos.item(i);
+
+                String id = curs.getAttribute("id");
+
+                String tutor = xpath.evaluate(
+                        "tutor",
+                        curs
+                );
+
+                String totalAlumnes = xpath.evaluate(
+                        "count(alumnes/alumne)",
+                        curs
+                );
+
+                List<String> fila = new ArrayList<>();
+                fila.add(id);
+                fila.add(tutor);
+                fila.add(totalAlumnes);
+
+                cursos.add(fila);
+            }
+
+        } catch (Exception e) {
+            System.err.println(
+                    "Error en llistar els cursos: " + e.getMessage()
+            );
+        }
+
+        return cursos;
     }
 
-    /**
-     * Imprimeix per consola una taula amb la informació dels cursos.
-     * 
-     * @param cursos Llista amb la informació dels cursos.
-     */
     public void imprimirTaulaCursos(List<List<String>> cursos) {
-        List<String> capçaleres = List.of("ID", "Tutor", "Total Alumnes");
-        AsciiTablePrinter.imprimirTaula(capçaleres, cursos);
+        List<String> capçaleres =
+            List.of("ID", "Tutor", "Total Alumnes");
+
+            AsciiTablePrinter.imprimirTaula(capçaleres, cursos);
     }
 
     /**
-     * Mostra els mòduls d'un curs especificat pel seu ID.
-     * 
-     * @param idCurs ID del curs del qual es volen veure els mòduls.
-     * @return Llista amb la informació dels mòduls (ID, títol).
+     * Opció 2: mostra els mòduls d'un curs mitjançant XPath.
      */
     public List<List<String>> mostrarModuls(String idCurs) {
-        // *************** CODI PRÀCTICA **********************/
-        return null; // Substitueix pel teu
+        List<List<String>> moduls = new ArrayList<>();
+
+        try {
+            Document doc = carregarDocumentXML(xmlFilePath);
+            XPath xpath = XPathFactory.newInstance().newXPath();
+
+            String expressio = "/cursos/curs[@id="
+                    + xpathLiteral(idCurs)
+                    + "]/moduls/modul";
+
+            NodeList nodesModuls = (NodeList) xpath.evaluate(
+                    expressio,
+                    doc,
+                    XPathConstants.NODESET
+            );
+
+            for (int i = 0; i < nodesModuls.getLength(); i++) {
+                Element modul = (Element) nodesModuls.item(i);
+
+                String id = modul.getAttribute("id");
+
+                String titol = xpath.evaluate(
+                        "titol",
+                        modul
+                );
+
+                List<String> fila = new ArrayList<>();
+                fila.add(id);
+                fila.add(titol);
+
+                moduls.add(fila);
+            }
+
+            if (moduls.isEmpty()) {
+                System.out.println(
+                        "No s'han trobat mòduls per al curs " + idCurs
+                );
+            }
+
+        } catch (Exception e) {
+            System.err.println(
+                    "Error en mostrar els mòduls: " + e.getMessage()
+            );
+        }
+
+        return moduls;
     }
 
-    /**
-     * Imprimeix per consola una taula amb la informació dels mòduls.
-     * 
-     * @param moduls Llista amb la informació dels mòduls.
-     */
     public void imprimirTaulaModuls(List<List<String>> moduls) {
-        List<String> capçaleres = List.of("ID Mòdul", "Títol");
+        List<String> capçaleres =
+                List.of("ID Mòdul", "Títol");
+
         AsciiTablePrinter.imprimirTaula(capçaleres, moduls);
     }
 
     /**
-     * Llista els alumnes inscrits en un curs especificat pel seu ID.
-     * 
-     * @param idCurs ID del curs del qual es volen veure els alumnes.
-     * @return Llista amb els noms dels alumnes.
+     * Opció 3: llista els alumnes d'un curs mitjançant XPath.
      */
     public List<String> llistarAlumnes(String idCurs) {
-        // *************** CODI PRÀCTICA **********************/
-        return null; // Substitueix pel teu
+        List<String> alumnes = new ArrayList<>();
+
+        try {
+            Document doc = carregarDocumentXML(xmlFilePath);
+            XPath xpath = XPathFactory.newInstance().newXPath();
+
+            String expressio = "/cursos/curs[@id="
+                    + xpathLiteral(idCurs)
+                    + "]/alumnes/alumne";
+
+            NodeList nodesAlumnes = (NodeList) xpath.evaluate(
+                    expressio,
+                    doc,
+                    XPathConstants.NODESET
+            );
+
+            for (int i = 0; i < nodesAlumnes.getLength(); i++) {
+                alumnes.add(
+                        nodesAlumnes.item(i).getTextContent()
+                );
+            }
+
+            if (alumnes.isEmpty()) {
+                System.out.println(
+                        "No s'han trobat alumnes. Comprova l'ID del curs."
+                );
+            }
+
+        } catch (Exception e) {
+            System.err.println(
+                    "Error en llistar els alumnes: " + e.getMessage()
+            );
+        }
+
+        return alumnes;
     }
 
-    /**
-     * Imprimeix per consola la llista d'alumnes d'un curs.
-     * 
-     * @param alumnes Llista d'alumnes a imprimir.
-     */
     public void imprimirLlistaAlumnes(List<String> alumnes) {
         System.out.println("Alumnes:");
-        alumnes.forEach(alumne -> System.out.println("- " + alumne));
+
+        alumnes.forEach(
+                alumne -> System.out.println("- " + alumne)
+        );
     }
 
-    /**
-     * Afegeix un alumne a un curs especificat pel seu ID.
-     * 
-     * @param idCurs ID del curs on es vol afegir l'alumne.
-     * @param nomAlumne Nom de l'alumne a afegir.
-     */
     public void afegirAlumne(String idCurs, String nomAlumne) {
-        // *************** CODI PRÀCTICA **********************/
+        try {
+            Document doc = carregarDocumentXML(xmlFilePath);
+            XPath xpath = XPathFactory.newInstance().newXPath();
+
+            String expressio = "/cursos/curs[@id="
+                    + xpathLiteral(idCurs)
+                    + "]/alumnes";
+
+            NodeList resultats = (NodeList) xpath.evaluate(
+                    expressio,
+                    doc,
+                    XPathConstants.NODESET
+            );
+
+            if (resultats.getLength() == 0) {
+                System.out.println(
+                        "No existeix el curs " + idCurs
+                );
+                return;
+            }
+
+            Element alumnes = (Element) resultats.item(0);
+
+            NodeList existents = alumnes.getElementsByTagName("alumne");
+
+            for (int i = 0; i < existents.getLength(); i++) {
+                if (existents.item(i).getTextContent()
+                        .trim().equalsIgnoreCase(nomAlumne.trim())) {
+                    System.out.println(
+                            "Aquest alumne ja està inscrit al curs."
+                    );
+                    return;
+                }
+            }
+
+            Element alumne = doc.createElement("alumne");
+            alumne.setTextContent(nomAlumne.trim());
+            alumnes.appendChild(alumne);
+
+            guardarDocumentXML(doc);
+
+            System.out.println(
+                    "Alumne afegit correctament al curs " + idCurs
+            );
+
+        } catch (Exception e) {
+            System.err.println(
+                    "Error en afegir l'alumne: " + e.getMessage()
+            );
+        }
     }
 
-    /**
-     * Elimina un alumne d'un curs especificat pel seu ID.
-     * 
-     * @param idCurs ID del curs d'on es vol eliminar l'alumne.
-     * @param nomAlumne Nom de l'alumne a eliminar.
-     */
     public void eliminarAlumne(String idCurs, String nomAlumne) {
-        // *************** CODI PRÀCTICA **********************/
+        try {
+            Document doc = carregarDocumentXML(xmlFilePath);
+            XPath xpath = XPathFactory.newInstance().newXPath();
+
+            String expressio = "/cursos/curs[@id="
+                    + xpathLiteral(idCurs)
+                    + "]/alumnes/alumne";
+
+            NodeList alumnes = (NodeList) xpath.evaluate(
+                    expressio,
+                    doc,
+                    XPathConstants.NODESET
+            );
+
+            Node alumneEliminar = null;
+
+            for (int i = 0; i < alumnes.getLength(); i++) {
+                Node alumne = alumnes.item(i);
+
+                if (alumne.getTextContent()
+                        .trim().equalsIgnoreCase(nomAlumne.trim())) {
+                    alumneEliminar = alumne;
+                    break;
+                }
+            }
+
+            if (alumneEliminar == null) {
+                System.out.println(
+                        "No s'ha trobat l'alumne al curs indicat."
+                );
+                return;
+            }
+
+            alumneEliminar.getParentNode().removeChild(alumneEliminar);
+
+            guardarDocumentXML(doc);
+
+            System.out.println(
+                    "Alumne eliminat correctament del curs " + idCurs
+            );
+
+        } catch (Exception e) {
+            System.err.println(
+                    "Error en eliminar l'alumne: " + e.getMessage()
+            );
+        }
     }
 
     /**
      * Carrega el document XML des de la ruta especificada.
-     * 
-     * @param pathToXml Ruta del fitxer XML a carregar.
-     * @return Document XML carregat.
      */
     private Document carregarDocumentXML(Path pathToXml) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
+            DocumentBuilderFactory factory =
+                    DocumentBuilderFactory.newInstance();
+
+            DocumentBuilder builder =
+                    factory.newDocumentBuilder();
+
             return builder.parse(pathToXml.toFile());
+
         } catch (Exception e) {
-            throw new RuntimeException("Error en carregar el document XML.", e);
+            throw new RuntimeException(
+                    "Error en carregar el document XML.", e
+            );
         }
     }
 
-    /**
-     * Guarda el document XML proporcionat en la ruta del fitxer original.
-     * 
-     * @param document Document XML a guardar.
-     */
     private void guardarDocumentXML(Document document) {
         try {
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-            // Sense això, l'espai en blanc original es manté i el fitxer s'omple de línies buides
             eliminarEspaisEnBlanc(document);
 
+            TransformerFactory transformerFactory =
+                    TransformerFactory.newInstance();
+
+            Transformer transformer =
+                    transformerFactory.newTransformer();
+
+            transformer.setOutputProperty(
+                    OutputKeys.INDENT, "yes"
+            );
+
+            transformer.setOutputProperty(
+                    OutputKeys.ENCODING, "UTF-8"
+            );
+
+            transformer.setOutputProperty(
+                    "{http://xml.apache.org/xslt}indent-amount",
+                    "2"
+            );
+
             DOMSource source = new DOMSource(document);
-            StreamResult result = new StreamResult(xmlFilePath.toFile());
+
+            StreamResult result =
+                    new StreamResult(xmlFilePath.toFile());
+
             transformer.transform(source, result);
-            System.out.println("El fitxer XML ha estat guardat amb èxit.");
-        } catch (TransformerException e) {
-            System.out.println("Error en guardar el fitxer XML.");
-            e.printStackTrace();
+
+            System.out.println(
+                    "El fitxer XML ha estat guardat amb èxit."
+            );
+
+        } catch (Exception e) {
+            System.err.println(
+                    "Error en guardar el fitxer XML: " + e.getMessage()
+            );
         }
     }
 
-    /**
-     * Elimina, de manera recursiva, els nodes de text que només contenen espais, tabuladors
-     * o salts de línia (l'indentació del fitxer original). Si no s'eliminen, en tornar a
-     * escriure el document amb INDENT = "yes" el fitxer s'omple de línies en blanc.
-     * És el mateix mètode trimWhitespace que s'explica a la teoria.
-     *
-     * @param node Node a partir del qual es fa la neteja (normalment, el Document).
-     */
+
     private static void eliminarEspaisEnBlanc(Node node) {
         NodeList fills = node.getChildNodes();
-        // Es recorre de darrere cap endavant perquè getChildNodes() és una llista «viva»
+
         for (int i = fills.getLength() - 1; i >= 0; i--) {
             Node fill = fills.item(i);
-            if (fill.getNodeType() == Node.TEXT_NODE && fill.getTextContent().isBlank()) {
+
+            if (fill.getNodeType() == Node.TEXT_NODE
+                    && fill.getTextContent().isBlank()) {
                 node.removeChild(fill);
             } else {
                 eliminarEspaisEnBlanc(fill);
             }
         }
+    }
+
+    private static String xpathLiteral(String valor) {
+        if (!valor.contains("'")) {
+            return "'" + valor + "'";
+        }
+
+        if (!valor.contains("\"")) {
+            return "\"" + valor + "\"";
+        }
+
+        String[] parts = valor.split("'", -1);
+        StringBuilder resultat = new StringBuilder("concat(");
+
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) {
+                resultat.append(", \"'\", ");
+            }
+
+            resultat.append("'").append(parts[i]).append("'");
+        }
+
+        resultat.append(")");
+        return resultat.toString();
     }
 }
