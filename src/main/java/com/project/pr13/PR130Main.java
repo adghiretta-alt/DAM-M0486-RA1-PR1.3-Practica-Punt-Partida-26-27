@@ -11,12 +11,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 
 /**
- * Programa que lee un fichero XML con información
- * de personas y la muestra por pantalla.
+ * Programa que lee un fichero XML con datos de personas
+ * y los muestra por pantalla.
  */
 public class PR130Main {
 
-    // Directorio donde se encuentran los XML
+    // Carpeta donde se encuentra el XML
     private final File dataDir;
 
     /**
@@ -31,9 +31,10 @@ public class PR130Main {
      */
     public static void main(String[] args) {
 
-        // Obtener la carpeta data/pr13
+        // Obtener el directorio actual del proyecto
         String userDir = System.getProperty("user.dir");
 
+        // Construir la ruta data/pr13
         File dataDir = new File(
                 userDir,
                 "data" + File.separator + "pr13"
@@ -42,16 +43,16 @@ public class PR130Main {
         // Crear la aplicación
         PR130Main app = new PR130Main(dataDir);
 
-        // Procesar el XML
+        // Procesar el fichero XML
         app.processarFitxerXML("persones.xml");
     }
 
     /**
-     * Lee el XML y muestra las personas.
+     * Lee el XML y muestra la información.
      */
     public void processarFitxerXML(String filename) {
 
-        // Crear referencia al fichero XML
+        // Referencia al fichero XML
         File inputFile = new File(dataDir, filename);
 
         // Convertir XML a Document
@@ -63,26 +64,26 @@ public class PR130Main {
             NodeList persones =
                     doc.getElementsByTagName("persona");
 
-            // Mostrar encabezados
+            // Mostrar cabeceras
             imprimirCapçaleres();
 
-            // Mostrar datos
+            // Mostrar datos de cada persona
             imprimirDadesPersones(persones);
         }
     }
 
     /**
-     * Lee un XML y devuelve un Document.
+     * Lee el fichero XML y devuelve un objeto Document.
      */
     public static Document parseXML(File inputFile) {
 
         try {
 
-            // Crear fábrica de documentos XML
+            // Crear fábrica XML
             DocumentBuilderFactory factory =
                     DocumentBuilderFactory.newInstance();
 
-            // Crear lector XML
+            // Crear parser XML
             DocumentBuilder builder =
                     factory.newDocumentBuilder();
 
@@ -101,7 +102,7 @@ public class PR130Main {
     }
 
     /**
-     * Imprime las cabeceras de la tabla.
+     * Muestra las cabeceras.
      */
     public static void imprimirCapçaleres() {
 
@@ -111,49 +112,125 @@ public class PR130Main {
     }
 
     /**
-     * Recorre todos los elementos persona
-     * y muestra sus datos formateados.
+     * Recorre las personas encontradas en el XML
+     * y muestra sus datos.
      */
     public static void imprimirDadesPersones(
             NodeList persones) {
 
-        // Recorrer todas las personas del XML
-        for (int i = 0;
-             i < persones.getLength();
-             i++) {
+        // Recorrer todos los nodos <persona>
+        for (int i = 0; i < persones.getLength(); i++) {
 
+            // Obtener una persona concreta de la lista
             Element personaElement =
                     (Element) persones.item(i);
 
-            // Obtener nombre
+            /*
+             * Busca todas las etiquetas <nom>
+             * dentro de la persona actual.
+             *
+             * getElementsByTagName("nom")
+             * devuelve un NodeList.
+             *
+             * Ejemplo:
+             *
+             * <persona>
+             *     <nom>Maria</nom>
+             * </persona>
+             *
+             * Resultado:
+             *
+             * Posición 0 -> <nom>Maria</nom>
+             *
+             * item(0)
+             * obtiene el primer elemento encontrado.
+             *
+             * Se usa 0 porque normalmente cada persona
+             * tiene un único nombre.
+             *
+             * Si hubiera varios:
+             *
+             * <nom>Maria</nom>
+             * <nom>Marieta</nom>
+             *
+             * item(0) -> Maria
+             * item(1) -> Marieta
+             *
+             * y necesitaríamos un bucle para leerlos todos.
+             *
+             * getTextContent()
+             * obtiene únicamente el texto.
+             *
+             * Resultado final:
+             * "Maria"
+             */
             String nom =
                     personaElement
-                        .getElementsByTagName("nom")
-                        .item(0)
-                        .getTextContent();
+                            .getElementsByTagName("nom")
+                            .item(0)
+                            .getTextContent();
 
-            // Obtener apellido
+            /*
+             * Obtener el texto de:
+             *
+             * <cognom>Lopez</cognom>
+             *
+             * Resultado:
+             * "Lopez"
+             */
             String cognom =
                     personaElement
-                        .getElementsByTagName("cognom")
-                        .item(0)
-                        .getTextContent();
+                            .getElementsByTagName("cognom")
+                            .item(0)
+                            .getTextContent();
 
-            // Obtener edad
+            /*
+             * Obtener el texto de:
+             *
+             * <edat>36</edat>
+             *
+             * Resultado:
+             * "36"
+             */
             String edat =
                     personaElement
-                        .getElementsByTagName("edat")
-                        .item(0)
-                        .getTextContent();
+                            .getElementsByTagName("edat")
+                            .item(0)
+                            .getTextContent();
 
-            // Obtener ciudad
+            /*
+             * Busca todas las etiquetas <ciutat>.
+             *
+             * Ejemplo:
+             *
+             * <ciutat>Barcelona</ciutat>
+             *
+             * getElementsByTagName("ciutat")
+             * devuelve un NodeList.
+             *
+             * item(0)
+             * obtiene el primer elemento de la lista.
+             *
+             * getTextContent()
+             * devuelve el texto:
+             *
+             * "Barcelona"
+             *
+             * Si hubiera:
+             *
+             * <ciutat>Barcelona</ciutat>
+             * <ciutat>Girona</ciutat>
+             *
+             * item(0) -> Barcelona
+             * item(1) -> Girona
+             */
             String ciutat =
                     personaElement
-                        .getElementsByTagName("ciutat")
-                        .item(0)
-                        .getTextContent();
+                            .getElementsByTagName("ciutat")
+                            .item(0)
+                            .getTextContent();
 
-            // Mostrar persona formateada
+            // Mostrar la persona formateada
             System.out.println(
                     PersonaFormatter.formatarPersona(
                             nom,
