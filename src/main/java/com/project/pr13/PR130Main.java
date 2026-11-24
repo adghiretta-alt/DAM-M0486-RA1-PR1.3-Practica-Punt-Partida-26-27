@@ -11,95 +11,157 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 
 /**
- * Classe principal que gestiona la lectura i el processament de fitxers XML per obtenir dades de persones.
- * 
- * Aquesta classe s'encarrega de llegir un fitxer XML que conté informació de persones,
- * processar-lo i mostrar les dades formatades per consola.
+ * Programa que lee un fichero XML con información
+ * de personas y la muestra por pantalla.
  */
 public class PR130Main {
 
+    // Directorio donde se encuentran los XML
     private final File dataDir;
 
     /**
-     * Constructor de la classe PR130Main.
-     * 
-     * @param dataDir Directori on es troben els fitxers de dades.
+     * Constructor.
      */
     public PR130Main(File dataDir) {
         this.dataDir = dataDir;
     }
 
     /**
-     * Mètode principal que inicia l'execució del programa.
-     * 
-     * @param args Arguments passats a la línia de comandament (no s'utilitzen en aquest programa).
+     * Punto de entrada del programa.
      */
     public static void main(String[] args) {
-        String userDir = System.getProperty("user.dir");
-        File dataDir = new File(userDir, "data" + File.separator + "pr13");
 
+        // Obtener la carpeta data/pr13
+        String userDir = System.getProperty("user.dir");
+
+        File dataDir = new File(
+                userDir,
+                "data" + File.separator + "pr13"
+        );
+
+        // Crear la aplicación
         PR130Main app = new PR130Main(dataDir);
+
+        // Procesar el XML
         app.processarFitxerXML("persones.xml");
     }
 
     /**
-     * Processa un fitxer XML per obtenir la informació de les persones i imprimir-la.
-     * 
-     * @param filename Nom del fitxer XML a processar.
+     * Lee el XML y muestra las personas.
      */
     public void processarFitxerXML(String filename) {
+
+        // Crear referencia al fichero XML
         File inputFile = new File(dataDir, filename);
+
+        // Convertir XML a Document
         Document doc = parseXML(inputFile);
+
         if (doc != null) {
-            NodeList persones = doc.getElementsByTagName("persona");
+
+            // Obtener todos los nodos <persona>
+            NodeList persones =
+                    doc.getElementsByTagName("persona");
+
+            // Mostrar encabezados
             imprimirCapçaleres();
+
+            // Mostrar datos
             imprimirDadesPersones(persones);
         }
     }
 
     /**
-     * Llegeix un fitxer XML i el converteix en un objecte Document.
-     * 
-     * @param inputFile Fitxer XML a llegir.
-     * @return Document XML carregat o null si hi ha hagut un error en la lectura.
+     * Lee un XML y devuelve un Document.
      */
     public static Document parseXML(File inputFile) {
-        // *************** CODI PRÀCTICA **********************/
-        try{
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                return builder.parse(inputFile); // Substitueix pel te
-        }catch (Exception e) {
-            System.err.println("Error al llegir el fitxer XML: " + e.getMessage());
+
+        try {
+
+            // Crear fábrica de documentos XML
+            DocumentBuilderFactory factory =
+                    DocumentBuilderFactory.newInstance();
+
+            // Crear lector XML
+            DocumentBuilder builder =
+                    factory.newDocumentBuilder();
+
+            // Leer y devolver el XML
+            return builder.parse(inputFile);
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Error al llegir el fitxer XML: "
+                    + e.getMessage()
+            );
+
             return null;
         }
     }
 
     /**
-     * Imprimeix per consola les capçaleres de la taula de persones.
-     * Cal fer servir PersonaFormatter.getCapçaleres().
+     * Imprime las cabeceras de la tabla.
      */
     public static void imprimirCapçaleres() {
-        // *************** CODI PRÀCTICA **********************/
-        System.out.println(PersonaFormatter.getCapçaleres());
+
+        System.out.println(
+                PersonaFormatter.getCapçaleres()
+        );
     }
 
     /**
-     * Imprimeix per consola una línia per a cada persona del NodeList,
-     * amb el format de PersonaFormatter.formatarPersona().
-     *
-     * @param persones NodeList amb els elements "persona" del document XML.
+     * Recorre todos los elementos persona
+     * y muestra sus datos formateados.
      */
-    public static void imprimirDadesPersones(NodeList persones) {
-    // *************** CODI PRÀCTICA **********************/
-        for (int i = 0; i < persones.getLength(); i++) {
-            Element personaElement = (Element) persones.item(i);
-            String nom = personaElement.getElementsByTagName("nom").item(0).getTextContent();
-            String cognom = personaElement.getElementsByTagName("cognom").item(0).getTextContent();
-            String edat = personaElement.getElementsByTagName("edat").item(0).getTextContent();
-            String ciutat = personaElement.getElementsByTagName("ciutat").item(0).getTextContent();
+    public static void imprimirDadesPersones(
+            NodeList persones) {
 
-            System.out.println(PersonaFormatter.formatarPersona(nom, cognom, edat, ciutat));
+        // Recorrer todas las personas del XML
+        for (int i = 0;
+             i < persones.getLength();
+             i++) {
+
+            Element personaElement =
+                    (Element) persones.item(i);
+
+            // Obtener nombre
+            String nom =
+                    personaElement
+                        .getElementsByTagName("nom")
+                        .item(0)
+                        .getTextContent();
+
+            // Obtener apellido
+            String cognom =
+                    personaElement
+                        .getElementsByTagName("cognom")
+                        .item(0)
+                        .getTextContent();
+
+            // Obtener edad
+            String edat =
+                    personaElement
+                        .getElementsByTagName("edat")
+                        .item(0)
+                        .getTextContent();
+
+            // Obtener ciudad
+            String ciutat =
+                    personaElement
+                        .getElementsByTagName("ciutat")
+                        .item(0)
+                        .getTextContent();
+
+            // Mostrar persona formateada
+            System.out.println(
+                    PersonaFormatter.formatarPersona(
+                            nom,
+                            cognom,
+                            edat,
+                            ciutat
+                    )
+            );
         }
     }
 }
