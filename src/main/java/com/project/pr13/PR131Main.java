@@ -11,190 +11,317 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 
 /**
- * Classe principal que crea un document XML amb informació de llibres i el guarda en un fitxer.
- * 
- * Aquesta classe permet construir un document XML, afegir elements i guardar-lo en un directori
- * especificat per l'usuari.
+ * Programa que crea un XML de una biblioteca
+ * y lo guarda en un fichero.
  */
 public class PR131Main {
 
+    // Directorio donde se guardará el XML
     private File dataDir;
 
     /**
-     * Constructor de la classe PR131Main.
-     * 
-     * @param dataDir Directori on es guardaran els fitxers de sortida.
+     * Constructor.
      */
     public PR131Main(File dataDir) {
         this.dataDir = dataDir;
     }
 
     /**
-     * Retorna el directori de dades actual.
-     * 
-     * @return Directori de dades.
+     * Devuelve el directorio de trabajo.
      */
     public File getDataDir() {
         return dataDir;
     }
 
     /**
-     * Actualitza el directori de dades.
-     * 
-     * @param dataDir Nou directori de dades.
+     * Cambia el directorio de trabajo.
      */
     public void setDataDir(File dataDir) {
         this.dataDir = dataDir;
     }
 
     /**
-     * Mètode principal que inicia l'execució del programa.
-     * 
-     * @param args Arguments passats a la línia de comandament (no s'utilitzen en aquest programa).
+     * Punto de entrada del programa.
      */
     public static void main(String[] args) {
-        String userDir = System.getProperty("user.dir");
-        File dataDir = new File(userDir, "data" + File.separator + "pr13");
 
+        // Obtener la ruta del proyecto
+        String userDir = System.getProperty("user.dir");
+
+        // Construir la ruta data/pr13
+        File dataDir = new File(
+                userDir,
+                "data" + File.separator + "pr13"
+        );
+
+        // Crear la aplicación
         PR131Main app = new PR131Main(dataDir);
+
+        // Generar el XML
         app.processarFitxerXML("biblioteca.xml");
     }
 
     /**
-     * Processa el document XML creant-lo, guardant-lo en un fitxer i comprovant el directori de sortida.
-     * 
-     * @param filename Nom del fitxer XML a guardar.
+     * Construye y guarda el XML.
      */
     public void processarFitxerXML(String filename) {
+
+        // Comprobar que exista el directorio
         if (comprovarIDirCrearDirectori(dataDir)) {
+
+            // Crear el documento XML
             Document doc = construirDocument();
-            File fitxerSortida = new File(dataDir, filename);
+
+            // Crear fichero destino
+            File fitxerSortida =
+                    new File(dataDir, filename);
+
+            // Guardar XML en disco
             guardarDocument(doc, fitxerSortida);
         }
     }
 
     /**
-     * Comprova si el directori existeix i, si no és així, el crea.
-     * 
-     * @param directori Directori a comprovar o crear.
-     * @return True si el directori ja existeix o s'ha creat amb èxit, false en cas contrari.
+     * Comprueba si existe el directorio.
+     * Si no existe lo crea.
      */
-    private boolean comprovarIDirCrearDirectori(File directori) {
+    private boolean comprovarIDirCrearDirectori(
+            File directori) {
+
         if (!directori.exists()) {
+
+            // Crear carpetas necesarias
             return directori.mkdirs();
         }
+
         return true;
     }
 
     /**
-     * Crea un document XML amb l'estructura d'una biblioteca i afegeix un llibre amb els seus detalls.
-     * Cal construir-lo amb DocumentBuilder. No és privat perquè els tests el puguin comprovar.
-     * 
-     * @return Document XML creat o null en cas d'error.
+     * Construye el documento XML.
      */
     static Document construirDocument() {
-        // *************** CODI PRÀCTICA **********************/
+
         try {
+
+            // Crear la factoría XML
             DocumentBuilderFactory factory =
                     DocumentBuilderFactory.newInstance();
 
+            // Crear el constructor XML
             DocumentBuilder builder =
                     factory.newDocumentBuilder();
 
-            Document doc = builder.newDocument();
+            // Crear documento vacío
+            Document doc =
+                    builder.newDocument();
 
-            // Element arrel: biblioteca
-            Element biblioteca = doc.createElement("biblioteca");
+            /*
+             * Crear elemento raíz.
+             *
+             * <biblioteca>
+             * </biblioteca>
+             */
+            Element biblioteca =
+                    doc.createElement("biblioteca");
+
+            /*
+             * appendChild()
+             * añade el elemento al documento.
+             *
+             * Si no hacemos esto, el elemento existe
+             * en memoria pero no forma parte del XML.
+             */
             doc.appendChild(biblioteca);
 
-            // Element llibre
-            Element llibre = doc.createElement("llibre");
+            /*
+             * Crear:
+             *
+             * <llibre>
+             * </llibre>
+             */
+            Element llibre =
+                    doc.createElement("llibre");
+
+            /*
+             * Añadir atributo:
+             *
+             * <llibre id="001">
+             */
             llibre.setAttribute("id", "001");
+
+            /*
+             * Añadir llibre dentro de biblioteca.
+             *
+             * Resultado:
+             *
+             * <biblioteca>
+             *     <llibre id="001">
+             *     </llibre>
+             * </biblioteca>
+             */
             biblioteca.appendChild(llibre);
 
-            // Títol
-            Element titol = doc.createElement("titol");
-            titol.setTextContent("El viatge dels venturons");
+            /*
+             * Crear:
+             *
+             * <titol>
+             * </titol>
+             */
+            Element titol =
+                    doc.createElement("titol");
+
+            /*
+             * setTextContent()
+             * coloca texto entre la apertura
+             * y cierre de la etiqueta.
+             *
+             * Resultado:
+             *
+             * <titol>
+             *     El viatge dels venturons
+             * </titol>
+             */
+            titol.setTextContent(
+                    "El viatge dels venturons"
+            );
+
+            // Añadir el título al libro
             llibre.appendChild(titol);
 
-            // Autor
-            Element autor = doc.createElement("autor");
+            /*
+             * Crear autor
+             */
+            Element autor =
+                    doc.createElement("autor");
+
             autor.setTextContent("Joan Pla");
+
             llibre.appendChild(autor);
 
-            // Any de publicació
+            /*
+             * Crear año de publicación
+             */
             Element anyPublicacio =
-                    doc.createElement("anyPublicacio");
+                    doc.createElement(
+                            "anyPublicacio"
+                    );
+
             anyPublicacio.setTextContent("1998");
+
             llibre.appendChild(anyPublicacio);
 
-            // Editorial
-            Element editorial = doc.createElement("editorial");
-            editorial.setTextContent("Edicions Mar");
+            /*
+             * Crear editorial
+             */
+            Element editorial =
+                    doc.createElement(
+                            "editorial"
+                    );
+
+            editorial.setTextContent(
+                    "Edicions Mar"
+            );
+
             llibre.appendChild(editorial);
 
-            // Gènere
-            Element genere = doc.createElement("genere");
+            /*
+             * Crear género
+             */
+            Element genere =
+                    doc.createElement("genere");
+
             genere.setTextContent("Aventura");
+
             llibre.appendChild(genere);
 
-            // Nombre de pàgines
-            Element pagines = doc.createElement("pagines");
+            /*
+             * Crear número de páginas
+             */
+            Element pagines =
+                    doc.createElement("pagines");
+
             pagines.setTextContent("320");
+
             llibre.appendChild(pagines);
 
-            // Disponibilitat
-            Element disponible = doc.createElement("disponible");
+            /*
+             * Crear disponibilidad
+             */
+            Element disponible =
+                    doc.createElement(
+                            "disponible"
+                    );
+
             disponible.setTextContent("true");
+
             llibre.appendChild(disponible);
 
             return doc;
 
         } catch (Exception e) {
+
             System.err.println(
                     "Error en crear el document XML: "
-                            + e.getMessage()
+                    + e.getMessage()
             );
+
             return null;
         }
     }
 
     /**
-     * Guarda el document XML proporcionat en el fitxer especificat.
-     * 
-     * @param doc Document XML a guardar.
-     * @param fitxerSortida Fitxer de sortida on es guardarà el document.
+     * Guarda el XML en un fichero.
      */
-       private static void guardarDocument(
+    private static void guardarDocument(
             Document doc,
             File fitxerSortida
     ) {
+
         if (doc == null) {
+
             System.err.println(
                     "No s'ha pogut crear el document XML."
             );
+
             return;
         }
 
         try {
+
+            // Crear transformador XML
             TransformerFactory transformerFactory =
                     TransformerFactory.newInstance();
 
             Transformer transformer =
                     transformerFactory.newTransformer();
 
+            // Formatear salida
             transformer.setOutputProperty(
-                    OutputKeys.INDENT, "yes"
+                    OutputKeys.INDENT,
+                    "yes"
             );
 
             transformer.setOutputProperty(
-                    OutputKeys.ENCODING, "UTF-8"
+                    OutputKeys.ENCODING,
+                    "UTF-8"
             );
 
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(fitxerSortida);
+            // Documento origen
+            DOMSource source =
+                    new DOMSource(doc);
 
-            transformer.transform(source, result);
+            // Fichero destino
+            StreamResult result =
+                    new StreamResult(
+                            fitxerSortida
+                    );
+
+            // Guardar XML
+            transformer.transform(
+                    source,
+                    result
+            );
 
             System.out.println(
                     "Fitxer XML creat correctament: "
@@ -202,6 +329,7 @@ public class PR131Main {
             );
 
         } catch (Exception e) {
+
             System.err.println(
                     "Error en guardar el document XML: "
                             + e.getMessage()
